@@ -754,7 +754,7 @@ async function mailEstPdf(x){
  if(!(window.claude&&window.claude.standalone))return;
  const c=by('clients',x.client),t=co(),to=[];
  if(c&&okMail(c.email))to.push({role:'client',email:c.email.trim()});
- if(!to.length)return toast('لم يُرسل PDF بالإيميل: سجّل البريد الإلكتروني للعميل '+((c&&c.name)||'')+' في تكويد العملاء',0);
+
  let tmp=null;
  try{
   if(typeof html2pdf==='undefined')throw new Error('مكتبة PDF لم تُحمَّل بعد');
@@ -766,8 +766,8 @@ async function mailEstPdf(x){
   const j=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(j.error||('خطأ '+r.status));
   const rs=j.results||[],okc=rs.filter(z=>z.ok).length,bad=rs.filter(z=>!z.ok);
-  if(okc&&!bad.length)toast('تم إرسال PDF المقايسة '+x.code+' بالإيميل ('+okc+')');
-  else if(okc)toast('أُرسل جزئيًا: تعذّر الإرسال إلى '+bad.map(z=>'العميل').join('، ')+' ('+(bad[0].error||'')+')',0);
+  if(okc&&!bad.length)toast(to.length?'تم إرسال PDF المقايسة '+x.code+' بالإيميل ('+okc+')':'أُرسل PDF المقايسة '+x.code+' للشركة فقط: سجّل بريد العميل '+((c&&c.name)||'')+' في تكويد العملاء');
+  else if(okc)toast('أُرسل جزئيًا: تعذّر الإرسال إلى '+bad.map(z=>z.role==='client'?'العميل':'الشركة').join('، ')+' ('+(bad[0].error||'')+')',0);
   else throw new Error((bad[0]&&bad[0].error)||'فشل الإرسال')
  }catch(e){toast('تعذّر إرسال المقايسة بالإيميل: '+(e&&e.message||''),0)}
  finally{document.body.classList.remove('cap');if(tmp)tmp.remove()}

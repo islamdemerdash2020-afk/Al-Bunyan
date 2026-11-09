@@ -2,6 +2,7 @@
 // المتغيرات (Vercel > Settings > Environment Variables):
 //   RESEND_API_KEY  (مطلوب)  مفتاح Resend
 //   MAIL_FROM       (اختياري) عنوان المرسل، الافتراضي onboarding@resend.dev (تجريبي: يرسل لإيميل حسابك فقط)
+//   COMPANY_EMAIL   (اختياري) تصله نسخة من كل مقايسة (لا يُسجَّل في النظام)
 //   APP_KEY         (اختياري) رمز بسيط يُرسله النظام في الهيدر x-app-key لمنع الاستخدام الخارجي
 const RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -17,8 +18,12 @@ module.exports = async (req, res) => {
   let b = req.body;
   try { if (typeof b === 'string') b = JSON.parse(b); } catch (e) { return res.status(400).json({ error: 'بيانات غير صالحة' }); }
   b = b || {};
-  const to = Array.isArray(b.to) ? b.to.slice(0, 2) : [];
-  if (!to.length || to.some(t => !t || !RE.test(String(t.email || '')))) return res.status(400).json({ error: 'عنوان بريد غير صالح' });
+  // مستلمو العميل يأتون من النظام، ونسخة الشركة تُضاف هنا من متغير COMPANY_EMAIL (غير مسجّلة في بيانات النظام)
+  const to = Array.isArray(b.to) ? b.to.slice(0, 1) : [];
+  if (to.some(t => !t || !RE.test(String(t.email || '')))) return res.status(400).json({ error: 'عنوان بريد غير صالح' });
+  const co = String(process.env.COMPANY_EMAIL || '').trim();
+  if (RE.test(co) && !to.some(t => String(t.email).toLowerCase() === co.toLowerCase())) to.push({ role: 'company', email: co });
+  if (!to.length) return res.status(400).json({ error: 'لا يوجد مستلم: سجّل بريد العميل أو أضف COMPANY_EMAIL في فيرسيل' });
   const pdf = String(b.pdf || '');
   if (!pdf.startsWith('JVBER') || pdf.length > 5500000) return res.status(400).json({ error: 'ملف PDF غير صالح أو كبير' });
 
