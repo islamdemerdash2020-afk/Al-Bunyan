@@ -571,7 +571,7 @@ function dash(m){const DD=dashData();dash0(m,DD);
 <div><label>إلى تاريخ</label><input type="date" value="${esc(DF.to)}" onchange="dashSet('to',this.value)"></div>
 <div><label>العميل</label><select onchange="dashSet('client',this.value)">${o(DF.client,'','كل العملاء')}${D.clients.map(c=>o(DF.client,c.id,c.name)).join('')}</select></div>
 <div><label>المشرف</label><select onchange="dashSet('sup',this.value)">${o(DF.sup,'','كل المشرفين')}${D.sups.map(c=>o(DF.sup,c.id,c.name)).join('')}</select></div>
-<div><button class="s" onclick="dashReset()">إعادة ضبط</button><button onclick="aiReport()">${IC('trend')} تحليل النتائج بالذكاء الاصطناعي</button></div></div></div>`;
+<div><button class="s" onclick="dashReset()">إعادة ضبط</button><button onclick="aiReport()">${IC('trend')} Analyzes</button></div></div></div>`;
  m.querySelector('h2').insertAdjacentHTML('afterend',bar)}
 let AIRUN=0;
 async function aiReport(){const sm=await (window.claude&&claude.use?claude.use('sample'):null);if(!sm)return msg('خاصية الذكاء الاصطناعي غير متاحة في هذا العرض.');
