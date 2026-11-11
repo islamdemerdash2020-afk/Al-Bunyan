@@ -490,6 +490,7 @@ html body #stm h4.stt,html body #main #stm h4.stt,html body .bkh h4,html body .b
 .pcv{position:relative;height:300px}.pf{border:2px solid #9fb8d0}table.pft{width:100%}table.pft td,table.pft th{font-size:14px;text-align:center;padding:7px 8px}.pft tr.pgt td{background:#e7f8ec}.pft tr.plt td{background:#fdeceb}.pbar{height:6px;background:#e6ecf5;border-radius:4px;margin-bottom:3px}.pbar i{display:block;height:100%;border-radius:4px}
 .g2{display:flex!important;flex-wrap:wrap;gap:14px}.g2>.card{flex:1 1 440px;min-width:0;margin:0}.g2 canvas{max-height:400px}
 @media(max-width:700px){.g2>.card{flex-basis:100%}}
+.dfs{display:none}.cap .dfs{display:block;background:#f3f8fd;border:1px solid #a9c0d6;border-radius:6px;padding:6px 12px;margin:6px 0;font-size:14px;font-weight:bold;color:#0b2a5b}.cap.cd #main>h2{display:none}.cap.cd .g2{display:grid!important;grid-template-columns:1fr 1fr}.cap.cd .pcv{height:260px}
 </style></head><body>
 <div id="tb" class="np"></div>
 <div class="bar np"><button onclick="document.querySelector('nav').classList.toggle('o')">☰ القائمة</button> <b id="cn2"></b></div>
@@ -650,6 +651,26 @@ function dashPerf2(m,DD){if(typeof Chart==='undefined')return;const h=m.querySel
  const P=['#2563eb','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#84cc16'],mk=(id,c)=>{const e=document.getElementById(id);if(e)CH.push(new Chart(e,c))},pie=(id,l,d,t)=>{if(d.length)mk(id,{type:t,data:{labels:l,datasets:[{data:d,backgroundColor:l.map((_,i)=>P[i%8]),borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',rtl:true},tooltip:{rtl:true,callbacks:{label:c=>c.label+': '+F(c.parsed)}}}}})};
  pie('q1',ty.map(x=>x[0]),ty.map(x=>x[1]),'doughnut');pie('q2',pj.map(x=>x.n),pj.map(x=>x.c),'pie');pie('q4',cl.map(x=>x.n),cl.map(x=>x.v),'doughnut');
  mk('q3',{type:'bar',data:{labels:['المقايسات','المقبوض','التكلفة','الربح التقديري'],datasets:[{data:[val,rec,cost,Math.max(0,val-cost)],backgroundColor:['#2563ebcc','#10b981cc','#f59e0bcc','#8b5cf6cc'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{rtl:true,callbacks:{label:c=>F(c.parsed.y)+(val?' ('+(c.parsed.y/val*100).toFixed(1)+'% من المقايسات)':'')}}}}})}
+async function dashPDF(){scrTop();if(typeof html2pdf==='undefined')return msg('تعذّر تحميل مكتبة PDF (يلزم اتصال بالإنترنت)');
+ const B=document.body;B.classList.add('cap','cc','cd');let bl=null;const el=$('#main');
+ try{if(!(await loadH2C()))throw 0;await new Promise(r=>setTimeout(r,1100));scrTop();
+  const R0=el.getBoundingClientRect(),W=el.scrollWidth||R0.width,H=el.scrollHeight,sc=Math.min(2,15000/Math.max(H,1));
+  const U=[...el.querySelectorAll('.ph,.dfs,#main>.g,#main>.card:not(.pf),.mhl,.pf .card,.g2>.card,.pft tr,#main>h2')].map(u=>{const r=u.getBoundingClientRect();return[r.top-R0.top,r.bottom-R0.top]}).filter(u=>u[1]-u[0]>2);
+  const cv=await window.__h2c141(el,{scale:sc,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff',logging:false});if(!cv||cv.width<10)throw 0;
+  const k=cv.width/W,mg=Math.round(12*k),PW=cv.width+2*mg,PHt=Math.round(PW*210/297),top=Math.round(8*k),ft=Math.round(26*k),Hc=PHt-top-ft,tall=Hc/k*.9;
+  const okc=c=>!U.some(u=>u[1]-u[0]<=tall&&c>u[0]+1&&c<u[1]-1);
+  const cuts=[...new Set(U.flatMap(u=>[u[0],u[1]]))].filter(c=>c>0&&c<H).sort((a,b)=>a-b);
+  const pages=[];let pos=0;while(pos<H-2){const lim=pos+Hc/k;let c=lim;if(lim<H){const cand=cuts.filter(x=>x>pos+Hc/k*.35&&x<=lim&&okc(x));c=cand.length?cand[cand.length-1]:lim}else c=H;pages.push([pos,c]);pos=c}
+  const co_=co(),N_=pages.length,pcs=pages.map((p,i)=>{const z=document.createElement('canvas');z.width=PW;z.height=PHt;const g=z.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,PW,PHt);const sy=Math.round(p[0]*k),sh=Math.min(cv.height-sy,Math.round((p[1]-p[0])*k));g.drawImage(cv,0,sy,cv.width,sh,mg,top,cv.width,sh);
+   g.strokeStyle='#9fb8d0';g.lineWidth=Math.max(1,k);g.beginPath();g.moveTo(mg,PHt-ft+4*k);g.lineTo(PW-mg,PHt-ft+4*k);g.stroke();g.fillStyle='#475569';g.font='bold '+Math.round(11*k)+'px Tahoma,Arial';g.textBaseline='middle';const y=PHt-ft/2+4*k;
+   g.direction='rtl';g.textAlign='right';g.fillText((co_.name||'')+' — لوحة المؤشرات التحليلية',PW-mg,y);g.textAlign='left';g.direction='ltr';g.fillText('صفحة '+(i+1)+' من '+N_+'   |   '+today(),mg,y);return z});
+  const t=document.createElement('canvas');t.width=10;t.height=5;
+  const pdf=await html2pdf().set({margin:0,image:{type:'jpeg',quality:.95},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}}).from(t,'canvas').toPdf().get('pdf');
+  while(pdf.internal.getNumberOfPages()>1)pdf.deletePage(pdf.internal.getNumberOfPages());
+  pcs.forEach((z,i)=>{if(i)pdf.addPage('a4','landscape');pdf.addImage(z.toDataURL('image/jpeg',.93),'JPEG',0,0,297,210)});
+  bl=pdf.output('blob')}catch(e){console.error(e);bl=null}
+ B.classList.remove('cap','cc','cd');if(!bl){return prn('#main','landscape','لوحة-المؤشرات')}
+ return pvShow(bl,'لوحة-المؤشرات')}
 let DF={from:'',to:'',month:'',client:'',sup:'',on:false};
 function dashData(){const f=DF;f.on=!!(f.client||f.sup||f.from||f.to);const ok=x=>(!f.from||String(x.date||'')>=f.from)&&(!f.to||String(x.date||'')<=f.to);
  let C=new Set(D.clients.map(c=>c.id)),P=new Set(D.projects.map(p=>p.id));const inter=(S,A)=>new Set([...S].filter(x=>A.has(x)));
@@ -684,8 +705,9 @@ function dash(m){const DD=dashData();dash0(m,DD);try{dashPerf(m,DD)}catch(e){con
 <div><label>إلى تاريخ</label><input type="date" value="${esc(DF.to)}" onchange="dashSet('to',this.value)"></div>
 <div><label>العميل</label><select onchange="dashSet('client',this.value)">${o(DF.client,'','كل العملاء')}${D.clients.map(c=>o(DF.client,c.id,c.name)).join('')}</select></div>
 <div><label>المشرف</label><select onchange="dashSet('sup',this.value)">${o(DF.sup,'','كل المشرفين')}${D.sups.map(c=>o(DF.sup,c.id,c.name)).join('')}</select></div>
-<div><button class="s" onclick="dashReset()">إعادة ضبط</button><button onclick="aiReport()">${IC('trend')} Analyzes</button></div></div></div>`;
- m.querySelector('h2').insertAdjacentHTML('afterend',bar)}
+<div><button class="s" onclick="dashReset()">إعادة ضبط</button><button class="pdf" onclick="dashPDF()">${IC('doc')} تصدير PDF</button><button onclick="aiReport()">${IC('trend')} Analyzes</button></div></div></div>`;
+ const fl=[DF.from||DF.to?'الفترة: '+(DF.from||'البداية')+' ← '+(DF.to||'اليوم'):'الفترة: كل الفترات',DF.client?'العميل: '+nm('clients',DF.client):'',DF.sup?'المشرف: '+nm('sups',DF.sup):''].filter(Boolean).join('  |  ');
+ m.querySelector('h2').insertAdjacentHTML('beforebegin',PH('لوحة المؤشرات التحليلية')+'<div class="dfs">'+esc(fl)+'</div>');m.querySelector('h2').insertAdjacentHTML('afterend',bar)}
 let AIRUN=0;
 async function aiReport(){const sm=await (window.claude&&claude.use?claude.use('sample'):null);if(!sm)return msg('خاصية الذكاء الاصطناعي غير متاحة في هذا العرض.');
  const data=dashSum(dashData());AIRUN++;const my=AIRUN;
