@@ -474,6 +474,7 @@ html body #main #stm .bkt b{font-size:24px!important}
 html body #main #stm h4.stt{font-size:15.5px!important}
 html body:not(.cc) #main:has(#stm) #stm table.sm th,html body:not(.cc) #main:has(#stm) #stm table.sm td{font-size:13.5px!important;padding:6px 6px!important;line-height:1.5}
 html body:not(.cc) #main:has(#stm) #stm table.sm th{font-size:14px!important}
+html body #app button.rd{background:linear-gradient(#fff1f0,#ffd0cb 55%,#f5b0a8)!important;color:#b3261e!important;border:1px solid #e39a92!important;border-radius:9px!important;font-weight:bold;text-shadow:none!important;box-shadow:inset 0 1px 0 #fff,0 4px 0 #d98f88,0 7px 10px #b3261e33!important;position:relative;top:0}html body #app button.rd:active{top:3px;box-shadow:inset 0 1px 3px #0005,0 1px 0 #0006!important}
 </style></head><body>
 <div id="tb" class="np"></div>
 <div class="bar np"><button onclick="document.querySelector('nav').classList.toggle('o')">☰ القائمة</button> <b id="cn2"></b></div>
@@ -914,7 +915,7 @@ function stmt(rows,open){let b=N(open);return`<table><tr><th>التاريخ</th>
 // ===== قسم كشوف حسابات العملاء (قائمة + فتح الكشف) =====
 function stmCtx(c){const pids=D.projects.filter(p=>p.client===c.id).map(p=>p.id),ests=D.ests.filter(e=>e.client===c.id&&ISAPR(e)),rc=D.rcpts.filter(r=>r.client===c.id),py=D.pays.filter(p=>pids.includes(p.project));return{rc,py,tot:sum(ests,eSale),got:sum(rc,r=>r.amount),ex:sum(py,p=>p.amount),n:ests.length,ps:D.projects.filter(p=>p.client===c.id)}}
 function stmts(m){const c=VIEW?by('clients',VIEW):null;
- if(c){const x=stmCtx(c);m.innerHTML=`<h2>كشف حساب العميل — ${esc(c.name)}</h2><div class="card np"><button class="s" onclick="go('stmts')">← رجوع لقائمة العملاء</button></div>${stmDetail(c,x.rc,x.py,x.tot)}`;CST=stmData(c,x.rc,x.py,x.tot);return}
+ if(c){const x=stmCtx(c);m.innerHTML=`<h2>كشف حساب العميل — ${esc(c.name)}</h2><div class="card np"><button class="rd" onclick="go('stmts')">← رجوع لقائمة العملاء</button></div>${stmDetail(c,x.rc,x.py,x.tot)}`;CST=stmData(c,x.rc,x.py,x.tot);return}
  const rows=[...D.clients].sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''))).map(c=>({c,x:stmCtx(c)})).filter(r=>!Q||(r.c.name+' '+(r.c.code||'')).toLowerCase().includes(Q.toLowerCase()));
  const T=rows.reduce((a,r)=>[a[0]+r.x.tot,a[1]+r.x.got],[0,0]);
  m.innerHTML=`<h2>كشوف حسابات العملاء</h2><div class="card np"><input placeholder="بحث باسم العميل أو كوده" value="${esc(Q)}" oninput="Q=this.value;stmts($('#main'));" style="max-width:320px"> ${EB('كشوف-حسابات-العملاء')}</div><div class="card tw"><table><tr><th>الكود</th><th>العميل</th><th>المشروعات</th><th>قيمة المقايسات المعتمدة</th><th>المحصّل</th><th>المتبقي</th><th class="np"></th></tr>${rows.map(({c,x})=>{const rem=x.tot-x.got;return`<tr><td>${esc(c.code||'')}</td><td><b>${esc(c.name)}</b></td><td style="white-space:normal">${x.ps.map(p=>esc(p.name)).join('، ')||'—'}</td><td>${F(x.tot)}</td><td class="${x.got>0?'gp':''}">${F(x.got)}</td><td><b class="${rem<0?'pos':rem>0?'neg2':''}">${F(rem)}</b></td><td class="np"><button class="s" onclick="go('stmts','${c.id}')">فتح كشف الحساب</button></td></tr>`}).join('')||'<tr><td colspan="7">لا يوجد عملاء</td></tr>'}<tr><td colspan="3"><b>الإجمالي</b></td><td><b>${F(T[0])}</b></td><td class="gp"><b>${F(T[1])}</b></td><td><b>${F(T[0]-T[1])}</b></td><td class="np"></td></tr></table></div>`}
