@@ -1375,6 +1375,7 @@ const secHtml=()=>`<div class="card np" id="sec"><b>الأمان</b>
  <p><button onclick="bkNow()">${IC('shield')} حفظ نسخة احتياطية الآن</button><button class="s" onclick="exp()">تنزيل نسخة كاملة (ملف)</button></p>
  <p>استعادة من ملف: <input type="file" accept=".json" onchange="imp(this.files[0])" style="max-width:260px"></p>
  <div class="tw"><b>النسخ المحفوظة (للاستعادة اضغط «استعادة»)</b><div id="bk">جارٍ التحميل…</div></div></div>
+ ${ISADM?`<div class="card np"><b>اختبار النظام — بيانات تجريبية</b><p><small>أضف بيانات تجريبية موسومة (مقايستان وعهد ومصروفات وقبض) لتجربة التقارير واللوحة، ثم احذفها بزر واحد دون المساس ببياناتك الحقيقية.</small></p><button onclick="demoForm()">بيانات تجريبية</button></div>`:''}
  ${CANRST()?`<div class="card np"><b>تصفير الحسابات</b><p><small>يحذف كل المعاملات (المقايسات والمشروعات والقبض والمصروفات والعهد…) ويُبقي أكواد العملاء والمشرفين والموردين والإعدادات. تُحفظ نسخة احتياطية قبل الحذف.</small></p><p><button class="d" onclick="rstForm()">تصفير كل المعاملات (بدء من جديد)</button></p></div>`:''}
  <div class="card np"><b>سجل النشاط (الدخول والخروج)</b> <button class="d" onclick="auClear()">تصفير سجل النشاط</button> <button class="s" id="auT" title="فتح / إغلاق" onclick="auTog()" style="padding:1px 10px;font-weight:bold">+</button><div id="au" style="display:none">جارٍ التحميل…</div></div>`;
 function prefs(m){if(ROLE==='viewer')return;const cur=document.documentElement.getAttribute('data-th')||'blue',c=co();
