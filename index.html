@@ -1192,7 +1192,7 @@ function stmData(c,rc,py,tot){const es=D.ests.filter(e=>e.client===c.id&&ISAPR(e
  return{E,X:Object.entries(X),n:c.name,code:c.code,phone:c.phone||'',addr:c.addr||c.loc||'',projects:D.projects.filter(p=>p.client===c.id).map(p=>p.name).join('، '),R,X2,T,from:ds[0]||'',to:ds[ds.length-1]||'',tot}}
 function stmHead(){const t=co();return{t,line:[t.activity,t.addr,t.city].filter(Boolean).join(' - '),parts:[t.phone?'ت: '+t.phone:'',t.phone2?'ت: '+t.phone2:'',t.email||''].filter(Boolean)}}
 const sg=v=>v<0?`<span class="sn">− ${F(-v)}</span>`:v>0?`<span class="sp">+ ${F(v)}</span>`:'<span>0</span>';
-const remS=v=>v>0?`<span class="sn">${F(v)}</span>`:`<span class="sp">${F(-v)}${v<0?' (دائن)':''}</span>`;
+const remS=v=>v>0?`<span class="sn">${F(v)}</span>`:`<span class="sp">${F(-v)}</span>`;
 
 // ===== هيدر وفوتر كشف الحساب بنمط كشف بنكي =====
 const bkNo=c=>'ST-'+String(c.code||'0')+'-'+today().replace(/-/g,'');
