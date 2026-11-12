@@ -491,7 +491,7 @@ html body #stm h4.stt,html body #main #stm h4.stt,html body .bkh h4,html body .b
 .g2{display:flex!important;flex-wrap:wrap;gap:14px}.g2>.card{flex:1 1 440px;min-width:0;margin:0}.g2 canvas{max-height:400px}
 @media(max-width:700px){.g2>.card{flex-basis:100%}}
 .dfs{display:none}.cap .dfs{display:block;background:#f3f8fd;border:1px solid #a9c0d6;border-radius:6px;padding:6px 12px;margin:6px 0;font-size:14px;font-weight:bold;color:#0b2a5b}.cap.cd #main>h2{display:none}.cap.cd .g2{display:grid!important;grid-template-columns:1fr 1fr}.cap.cd .pcv{height:260px}
-#pdfroot{position:fixed;left:-6000px;top:0;direction:rtl;font-family:Tahoma,Arial;color:#12239E}#pdfroot .pg{width:1560px;height:1103px;background:#fff;padding:26px 34px;box-sizing:border-box;position:relative;display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+#pdfroot{position:absolute;left:0;top:0;z-index:-1;pointer-events:none;direction:rtl;font-family:Tahoma,Arial;color:#12239E}#pdfroot .pg{width:1560px;height:1103px;background:#fff;padding:26px 34px;box-sizing:border-box;position:relative;display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
 #pdfroot .ph0{display:flex;justify-content:space-between;align-items:center;border-bottom:4px solid #118DFF;padding-bottom:10px}#pdfroot .pl{display:flex;gap:14px;align-items:center}#pdfroot .pl img{height:64px;max-width:150px;object-fit:contain}#pdfroot .pl b{display:block;font-size:30px}#pdfroot .pl span{font-size:16px;color:#475569}#pdfroot .pr{text-align:left}#pdfroot .pr b{display:block;font-size:28px;color:#118DFF}#pdfroot .pr span{font-size:16px;color:#475569}
 #pdfroot .pfl{font-size:18px;font-weight:bold;color:#12239E;padding:0 4px}
 #pdfroot .prow{display:grid;gap:14px}#pdfroot .k7{grid-template-columns:repeat(7,1fr)}#pdfroot .k6{grid-template-columns:repeat(6,1fr)}#pdfroot .k4{grid-template-columns:repeat(4,1fr)}#pdfroot .k3{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,minmax(0,1fr));flex:1;min-height:0;margin-bottom:34px}#pdfroot .ch{grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));flex:1;min-height:0;margin-bottom:34px}#pdfroot .pk svg{fill:none;stroke:#118DFF;stroke-width:1.6;width:100%;height:100%}
@@ -507,7 +507,11 @@ html body #main .k b{font-size:18px!important}html body #main .kl .k b{font-size
 html body #main:has(#stm) #stm table.sm td{font-size:16.5px!important;line-height:1.6}html body #main:has(#stm) #stm table.sm th{font-size:16px!important}html body #main:has(#stm) #stm table.sm tr.it td{font-size:15.5px!important}
 html body:not(.cc) #main:has(#stm) #stm table.sm td{font-size:16.5px!important;line-height:1.6}html body:not(.cc) #main:has(#stm) #stm table.sm th{font-size:16px!important}html body:not(.cc) #main:has(#stm) #stm table.sm tr.it td{font-size:15.5px!important}
 html body.cap.cc #main:has(#stm) #stm table.sm td,html body.cap.cc #main:has(#stm) #stm table.sm th{font-size:13px!important;padding:4px 5px!important}html body.cap.cc #main:has(#stm) #stm table.sm tr.it td{font-size:12px!important}
-.dbtns button{flex:1 1 150px;max-width:210px;min-height:42px;margin:0!important;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:15px}
+.dbtns button{width:100%;min-height:42px;margin:0!important;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:15px;white-space:nowrap}
+#dfb .fm{grid-template-columns:repeat(8,minmax(0,1fr))!important}
+@media(max-width:1150px){#dfb .fm{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(max-width:600px){#dfb .fm{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+.dbtns button{padding-inline:6px;font-size:14px}
 </style></head><body>
 <div id="tb" class="np"></div>
 <div class="bar np"><button onclick="document.querySelector('nav').classList.toggle('o')">☰ القائمة</button> <b id="cn2"></b></div>
@@ -714,8 +718,9 @@ async function dashPDF(){scrTop();if(typeof html2pdf==='undefined')return msg('�
   const pdf=await html2pdf().set({margin:0,image:{type:'jpeg',quality:.95},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}}).from(t,'canvas').toPdf().get('pdf');
   while(pdf.internal.getNumberOfPages()>1)pdf.deletePage(pdf.internal.getNumberOfPages());
   cvs.forEach((z,i)=>{if(i)pdf.addPage('a4','landscape');pdf.addImage(z.toDataURL('image/jpeg',.95),'JPEG',0,0,297,210)});
-  bl=pdf.output('blob')}catch(e){console.error(e);bl=null}
- mini.forEach(x=>{try{x.destroy()}catch(e){}});if(root)root.remove();if(!bl)return msg('تعذّر تجهيز ملف PDF');return pvShow(bl,'لوحة-المؤشرات')}
+  bl=pdf.output('blob')}catch(e){console.error(e);bl=null;window.__pdfErr=e}
+ mini.forEach(x=>{try{x.destroy()}catch(e){}});if(root)root.remove();if(!bl){const er=window.__pdfErr;window.__pdfErr=null;return msg('تعذّر تجهيز ملف PDF'+(er&&(er.message||er)?' — '+(er.message||er):''))}
+ try{await pvShow(bl,'لوحة-المؤشرات')}catch(e){console.error(e);try{await dl.save({filename:'لوحة-المؤشرات-'+today()+'.pdf',data:bl})}catch(e2){const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='dashboard-'+today()+'.pdf';document.body.appendChild(a);a.click();a.remove()}}}
 let DF={from:'',to:'',month:'',client:'',sup:'',on:false};
 function dashData(){const f=DF;f.on=!!(f.client||f.sup||f.from||f.to);const ok=x=>(!f.from||String(x.date||'')>=f.from)&&(!f.to||String(x.date||'')<=f.to);
  let C=new Set(D.clients.map(c=>c.id)),P=new Set(D.projects.map(p=>p.id));const inter=(S,A)=>new Set([...S].filter(x=>A.has(x)));
@@ -750,7 +755,7 @@ function dash(m){const DD=dashData();dash0(m,DD);try{dashPerf(m,DD)}catch(e){con
 <div><label>إلى تاريخ</label><input type="date" value="${esc(DF.to)}" onchange="dashSet('to',this.value)"></div>
 <div><label>العميل</label><select onchange="dashSet('client',this.value)">${o(DF.client,'','كل العملاء')}${D.clients.map(c=>o(DF.client,c.id,c.name)).join('')}</select></div>
 <div><label>المشرف</label><select onchange="dashSet('sup',this.value)">${o(DF.sup,'','كل المشرفين')}${D.sups.map(c=>o(DF.sup,c.id,c.name)).join('')}</select></div>
-<div class="dbtns" style="grid-column:1/-1;display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-start;padding-top:4px;border-top:1px dashed #c3d3e3"><button onclick="aiReport()">${IC('trend')} Analyzes</button><button class="pdf" onclick="dashPDF()">${IC('doc')} تصدير PDF</button><button class="s" onclick="dashReset()">↺ إعادة ضبط</button></div></div></div>`;
+<div class="dbtns"><button class="s" onclick="dashReset()">↺ إعادة ضبط</button></div><div class="dbtns"><button class="pdf" onclick="dashPDF()">${IC('doc')} تصدير PDF</button></div><div class="dbtns"><button onclick="aiReport()">${IC('trend')} Analyzes</button></div></div></div>`;
  const fl=[DF.from||DF.to?'الفترة: '+(DF.from||'البداية')+' ← '+(DF.to||'اليوم'):'الفترة: كل الفترات',DF.client?'العميل: '+nm('clients',DF.client):'',DF.sup?'المشرف: '+nm('sups',DF.sup):''].filter(Boolean).join('  |  ');
  m.querySelector('h2').insertAdjacentHTML('beforebegin',PH('لوحة المؤشرات التحليلية')+'<div class="dfs">'+esc(fl)+'</div>');m.querySelector('h2').insertAdjacentHTML('afterend',bar)}
 let AIRUN=0;
