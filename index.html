@@ -758,11 +758,45 @@ function dash(m){const DD=dashData();dash0(m,DD);try{dashPerf(m,DD)}catch(e){con
 <div class="dbtns"><button class="s" onclick="dashReset()">↺ إعادة ضبط</button></div><div class="dbtns"><button class="pdf" onclick="dashPDF()">${IC('doc')} تصدير PDF</button></div><div class="dbtns"><button onclick="aiReport()">${IC('trend')} Analyzes</button></div></div></div>`;
  const fl=[DF.from||DF.to?'الفترة: '+(DF.from||'البداية')+' ← '+(DF.to||'اليوم'):'الفترة: كل الفترات',DF.client?'العميل: '+nm('clients',DF.client):'',DF.sup?'المشرف: '+nm('sups',DF.sup):''].filter(Boolean).join('  |  ');
  m.querySelector('h2').insertAdjacentHTML('beforebegin',PH('لوحة المؤشرات التحليلية')+'<div class="dfs">'+esc(fl)+'</div>');m.querySelector('h2').insertAdjacentHTML('afterend',bar)}
+function localReport(d){const f=x=>F(Math.round(x)),L=[],pc=(a,b)=>b>0?(a/b*100).toFixed(1)+'%':'—',ms=d.شهريا||[],ap=d.المقايسات_المعتمدة||{عدد:0,قيمة:0},rec=d.إجمالي_المقبوضات||0,ex=d.مصروفات_مدفوعة||0,cu=d.عهد_مسلمة||0,cr=d.عهد_غير_مسواة||0,net=d.صافي_حركة_النقد||0;
+ const fl=d.الفلاتر||{};L.push('الفترة: '+(fl.من&&fl.من!=='الكل'?fl.من:'البداية')+' إلى '+(fl.إلى&&fl.إلى!=='الكل'?fl.إلى:'اليوم')+(fl.العميل&&fl.العميل!=='الكل'?' — العميل: '+fl.العميل:'')+(fl.المشرف&&fl.المشرف!=='الكل'?' — المشرف: '+fl.المشرف:''));
+ L.push('1) ملخص الوضع');
+ if(!rec&&!ex&&!cu&&!ap.عدد){L.push('لا توجد بيانات مالية ضمن الفلاتر المحددة، لذلك لا يمكن إعداد تحليل ذي معنى.');return L.join('\n')}
+ L.push('- عدد العملاء '+d.عدد_العملاء+'، والمشروعات الجارية '+d.المشروعات_الجارية+'، والمقايسات المعتمدة '+ap.عدد+' بقيمة '+f(ap.قيمة)+' ج.م.');
+ L.push('- إجمالي المقبوضات '+f(rec)+' ج.م، وإجمالي المصروفات والعهد المسلّمة '+f(ex+cu)+' ج.م، فيكون صافي حركة النقد '+(net>=0?'':'سالبًا ')+f(Math.abs(net))+' ج.م.');
+ L.push('2) أبرز الأرقام والاتجاهات الشهرية');
+ if(ms.length){const n=m=>m.مقبوضات-m.مصروفات,hi=ms.reduce((a,m)=>n(m)>n(a)?m:a,ms[0]),lo=ms.reduce((a,m)=>n(m)<n(a)?m:a,ms[0]),hr=ms.reduce((a,m)=>m.مقبوضات>a.مقبوضات?m:a,ms[0]),he=ms.reduce((a,m)=>m.مصروفات>a.مصروفات?m:a,ms[0]);
+  L.push('- أعلى شهر صافيًا: '+hi.الشهر+' بصافي '+f(n(hi))+' ج.م، وأقل شهر: '+lo.الشهر+' بصافي '+f(n(lo))+' ج.م.');
+  L.push('- أعلى شهر تحصيلًا: '+hr.الشهر+' ('+f(hr.مقبوضات)+' ج.م)، وأعلى شهر إنفاقًا: '+he.الشهر+' ('+f(he.مصروفات)+' ج.م).');
+  if(ms.length>1){const a=ms[ms.length-1],b=ms[ms.length-2],ca=n(a),cb=n(b);L.push('- آخر شهر ('+a.الشهر+') صافيه '+f(ca)+' ج.م مقابل '+f(cb)+' ج.م في '+b.الشهر+(cb?'، بتغير '+((ca-cb)/Math.abs(cb)*100).toFixed(1)+'%':'')+'.')}
+  const neg=ms.filter(m=>n(m)<0);if(neg.length)L.push('- شهور صافيها سالب: '+neg.map(m=>m.الشهر).join('، ')+'.')}else L.push('- لا توجد حركة شهرية.');
+ L.push('3) تحليل المصروفات والتكلفة مقابل المقايسات والربحية');
+ const ty=Object.entries(d.المصروفات_حسب_النوع||{}).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),tt=ty.reduce((s,x)=>s+x[1],0);
+ if(ty.length)L.push('- أكبر بنود المصروفات: '+ty.slice(0,4).map(x=>x[0]+' '+f(x[1])+' ج.م ('+pc(x[1],tt)+')').join('، ')+'.');
+ L.push('- نسبة المصروفات إلى قيمة المقايسات المعتمدة '+pc(ex,ap.قيمة)+'، ونسبة التحصيل من قيمة المقايسات '+pc(rec,ap.قيمة)+'.');
+ const pj=(d.المشروعات||[]).filter(x=>x.المقايسة>0);pj.forEach(x=>{const m=x.المقايسة-x.التكلفة_الفعلية;L.push('- مشروع '+x.المشروع+': مقايسة '+f(x.المقايسة)+'، مقبوض '+f(x.المقبوض)+'، تكلفة فعلية '+f(x.التكلفة_الفعلية)+' (هامش تقديري '+pc(m,x.المقايسة)+').')});
+ L.push('4) العملاء المتأخرون في السداد والعهد غير المسواة');
+ const cl=(d.العملاء||[]).map(x=>({...x,r:x.المقايسات_المعتمدة-x.المحصل})).filter(x=>x.r>0.5).sort((a,b)=>b.r-a.r);
+ if(cl.length)cl.slice(0,5).forEach(x=>L.push('- '+x.العميل+': متبقٍ '+f(x.r)+' ج.م من '+f(x.المقايسات_المعتمدة)+' (محصّل '+pc(x.المحصل,x.المقايسات_المعتمدة)+').'));else L.push('- لا توجد مبالغ متبقية على العملاء.');
+ L.push('- العهد غير المسواة '+f(cr)+' ج.م'+(cu?' من إجمالي عهد مسلّمة '+f(cu)+' ج.م':'')+'.');
+ L.push('5) مخاطر وملاحظات');
+ let k=0;const nt=t=>{L.push('- '+t);k++};
+ if(net<0)nt('صافي حركة النقد سالب، أي أن المنصرف يفوق المحصَّل في هذه الفترة.');
+ if(ap.قيمة>0&&ex>ap.قيمة*0.8)nt('المصروفات تجاوزت 80% من قيمة المقايسات، وهامش الربح ضيق.');
+ if(cr>0&&cu>0&&cr/cu>0.3)nt('نسبة العهد غير المسواة مرتفعة ('+pc(cr,cu)+') وتستدعي المتابعة.');
+ if(cl.length&&cl[0].r>ap.قيمة*0.3)nt('يتركز المتبقي في عميل واحد ('+cl[0].العميل+')، ما يرفع مخاطر التحصيل.');
+ if(!k)nt('لا توجد مخاطر ظاهرة من الأرقام الحالية.');
+ L.push('6) توصيات عملية');
+ if(cl.length)L.push('- متابعة تحصيل المتبقي من '+cl[0].العميل+' وجدولة الدفعات القادمة.');
+ if(cr>0)L.push('- تسوية العهد المفتوحة بإرجاع المتبقي أو تقديم مستندات الصرف.');
+ L.push('- مراجعة بنود المصروفات الأعلى ومقارنتها بالمقايسة قبل الصرف الجديد.');L.push('- متابعة نسبة التحصيل إلى قيمة المقايسات شهريًا من اللوحة.');
+ L.push('ملاحظة: هذا تقرير آلي مبني على أرقام النظام فقط وبدون استخدام الذكاء الاصطناعي.');return L.join('\n')}
 let AIRUN=0;
-async function aiReport(){const sm=await (window.claude&&claude.use?claude.use('sample'):null);if(!sm)return msg('خاصية الذكاء الاصطناعي غير متاحة في هذا العرض.');
+async function aiReport(){let sm=null;try{sm=await (window.claude&&claude.use?claude.use('sample'):null)}catch(e){}
  const data=dashSum(dashData());AIRUN++;const my=AIRUN;
- modal(`<h3>تقرير تحليل النتائج (ذكاء اصطناعي)</h3><div id="aiout" class="card" style="white-space:pre-wrap;line-height:1.9;min-height:120px">جارٍ إعداد التقرير…</div><p class="np"><button class="s" onclick="aiPdf()">معاينة وطباعة</button><button class="pdf" onclick="aiPdf()">تصدير PDF</button><button class="s" onclick="modal()">إغلاق</button></p>`);
+ modal(`<h3>تقرير تحليل النتائج${sm?' (ذكاء اصطناعي)':''}</h3><div id="aiout" class="card" style="white-space:pre-wrap;line-height:1.9;min-height:120px">جارٍ إعداد التقرير…</div><p class="np"><button class="s" onclick="aiPdf()">معاينة وطباعة</button><button class="pdf" onclick="aiPdf()">تصدير PDF</button><button class="s" onclick="modal()">إغلاق</button></p>`);
  const out=document.getElementById('aiout');
+ if(!sm){out.textContent=localReport(data);return}
  try{const r=await sm(`أنت محلل مالي لشركة مقاولات وتشطيبات مصرية. فيما يلي بيانات فعلية من نظام الشركة (بالجنيه المصري) بصيغة JSON ضمن الفلاتر المحددة. اكتب تقريرًا عربيًا مهنيًا ومختصرًا يتضمن: 1) ملخص الوضع 2) أبرز الأرقام والاتجاهات الشهرية 3) تحليل المصروفات والتكلفة مقابل المقايسات والربحية 4) العملاء المتأخرون في السداد والعهد غير المسواة 5) مخاطر وملاحظات 6) توصيات عملية. اعتمد على الأرقام الواردة فقط دون اختلاق أي بيانات، وإذا كانت البيانات قليلة أو صفرية فاذكر ذلك صراحة. اكتب بنصوص عادية بدون رموز تنسيق ماركداون.\\n\\n`+JSON.stringify(data),{modelTier:'default',cache:false,onText:t=>{if(my===AIRUN&&out)out.textContent=t.text}});
   if(my===AIRUN&&out)out.textContent=r.text}catch(e){if(out)out.textContent='تعذّر إعداد التقرير: '+((e&&e.message)||'خطأ غير معروف')}}
 
