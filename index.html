@@ -721,8 +721,9 @@ async function dashPDF(){scrTop();if(typeof html2pdf==='undefined')return msg('�
   bl=pdf.output('blob')}catch(e){console.error(e);bl=null;window.__pdfErr=e}
  mini.forEach(x=>{try{x.destroy()}catch(e){}});if(root)root.remove();if(!bl){const er=window.__pdfErr;window.__pdfErr=null;return msg('تعذّر تجهيز ملف PDF'+(er&&(er.message||er)?' — '+(er.message||er):''))}
  try{await pvShow(bl,'لوحة-المؤشرات')}catch(e){console.error(e);try{await dl.save({filename:'لوحة-المؤشرات-'+today()+'.pdf',data:bl})}catch(e2){const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='dashboard-'+today()+'.pdf';document.body.appendChild(a);a.click();a.remove()}}}
-let DF={from:'',to:'',month:'',client:'',sup:'',on:false};
-function dashData(){const f=DF;f.on=!!(f.client||f.sup||f.from||f.to);const ok=x=>(!f.from||String(x.date||'')>=f.from)&&(!f.to||String(x.date||'')<=f.to);
+const DSTART='2026-11-01';
+let DF={from:DSTART,to:'',month:'',client:'',sup:'',on:false};
+function dashData(){const f=DF;f.on=!!(f.client||f.sup||(f.from&&f.from!==DSTART)||f.to);const ok=x=>(!f.from||String(x.date||'')>=f.from)&&(!f.to||String(x.date||'')<=f.to);
  let C=new Set(D.clients.map(c=>c.id)),P=new Set(D.projects.map(p=>p.id));const inter=(S,A)=>new Set([...S].filter(x=>A.has(x)));
  const sn=f.sup?nm('sups',f.sup):'';
  if(f.sup){const P1=new Set(D.projects.filter(p=>p.sup===f.sup).map(p=>p.id)),C1=new Set([...D.clients.filter(c=>c.sup===f.sup).map(c=>c.id),...D.projects.filter(p=>P1.has(p.id)).map(p=>p.client)]);D.projects.forEach(p=>{if(C1.has(p.client))P1.add(p.id)});C=inter(C,C1);P=inter(P,P1)}
@@ -733,8 +734,8 @@ function dashData(){const f=DF;f.on=!!(f.client||f.sup||f.from||f.to);const ok=x
  const pays=D.pays.filter(x=>ok(x)&&(!act||P.has(x.project)));
  const ests=D.ests.filter(e=>ok(e)&&(!act||C.has(e.client)||(f.sup&&!f.client&&(e.sup===f.sup||(e.team||[]).some(t=>t.sup===f.sup)))));
  return{...D,custody,rcpts,pays,ests,projects:act?D.projects.filter(p=>P.has(p.id)):D.projects,clients:act?D.clients.filter(c=>C.has(c.id)):D.clients}}
-function dashSet(k,v){if(k==='month'){DF.month=v;if(v){DF.from=v+'-01';DF.to=v+'-31'}else{DF.from='';DF.to=''}}else{DF[k]=v;if(k==='from'||k==='to')DF.month=''}draw()}
-function dashReset(){DF={from:'',to:'',month:'',client:'',sup:'',on:false};draw()}
+function dashSet(k,v){if(k==='month'){DF.month=v;if(v){DF.from=v+'-01';DF.to=v+'-31'}else{DF.from=DSTART;DF.to=''}}else{DF[k]=v;if(k==='from'||k==='to')DF.month='';if(k==='from'&&!v)DF.from=DSTART}draw()}
+function dashReset(){DF={from:DSTART,to:'',month:'',client:'',sup:'',on:false};draw()}
 function dashSum(DD){const outs=[...DD.pays.filter(p=>p.method!=='عهدة'),...DD.custody];const byT={};DD.pays.forEach(p=>{const n=nm('ptypes',p.type);byT[n]=(byT[n]||0)+N(p.amount)});
  const mon=x=>String(x.date||'').slice(0,7),ms=[...new Set([...DD.rcpts,...outs].map(mon).filter(Boolean))].sort();
  const rg={f:DF.from,t:DF.to};
@@ -747,7 +748,7 @@ function dashSum(DD){const outs=[...DD.pays.filter(p=>p.method!=='عهدة'),...
  المشروعات:DD.projects.slice(0,15).map(p=>{const c=pcard(p.id,rg);return{المشروع:p.name,العميل:nm('clients',p.client),الحالة:p.status,المقايسة:c.val,المقبوض:c.rec,التكلفة_الفعلية:c.cost}}),
  العملاء:DD.clients.slice(0,15).map(c=>({العميل:c.name,المقايسات_المعتمدة:sum(DD.ests.filter(e=>e.client===c.id&&ISAPR(e)),eSale),المحصل:sum(DD.rcpts.filter(r=>r.client===c.id),r=>r.amount)}))}}
 function dash(m){const DD=dashData();dash0(m,DD);try{dashPerf(m,DD)}catch(e){console.error(e)}try{dashPerf2(m,DD)}catch(e){console.error(e)}
- const months=[...new Set([...D.rcpts,...D.pays,...D.custody].map(x=>String(x.date||'').slice(0,7)).filter(x=>/^\d{4}-\d{2}$/.test(x)))].sort().reverse();
+ const months=[...new Set([...D.rcpts,...D.pays,...D.custody].map(x=>String(x.date||'').slice(0,7)).filter(x=>/^\d{4}-\d{2}$/.test(x)&&x>=DSTART.slice(0,7)))].sort().reverse();
  const o=(a,v,l)=>`<option value="${esc(v)}" ${a===v?'selected':''}>${esc(l)}</option>`;
  const bar=`<div class="card np" id="dfb"><div class="fm" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));align-items:end">
 <div><label>الشهر</label><select onchange="dashSet('month',this.value)">${o(DF.month,'','كل الشهور')}${months.map(x=>o(DF.month,x,x)).join('')}</select></div>
