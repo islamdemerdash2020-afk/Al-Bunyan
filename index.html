@@ -507,6 +507,7 @@ html body #main .k b{font-size:18px!important}html body #main .kl .k b{font-size
 html body #main:has(#stm) #stm table.sm td{font-size:16.5px!important;line-height:1.6}html body #main:has(#stm) #stm table.sm th{font-size:16px!important}html body #main:has(#stm) #stm table.sm tr.it td{font-size:15.5px!important}
 html body:not(.cc) #main:has(#stm) #stm table.sm td{font-size:16.5px!important;line-height:1.6}html body:not(.cc) #main:has(#stm) #stm table.sm th{font-size:16px!important}html body:not(.cc) #main:has(#stm) #stm table.sm tr.it td{font-size:15.5px!important}
 html body.cap.cc #main:has(#stm) #stm table.sm td,html body.cap.cc #main:has(#stm) #stm table.sm th{font-size:13px!important;padding:4px 5px!important}html body.cap.cc #main:has(#stm) #stm table.sm tr.it td{font-size:12px!important}
+.dbtns button{flex:1 1 150px;max-width:210px;min-height:42px;margin:0!important;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:15px}
 </style></head><body>
 <div id="tb" class="np"></div>
 <div class="bar np"><button onclick="document.querySelector('nav').classList.toggle('o')">☰ القائمة</button> <b id="cn2"></b></div>
@@ -749,7 +750,7 @@ function dash(m){const DD=dashData();dash0(m,DD);try{dashPerf(m,DD)}catch(e){con
 <div><label>إلى تاريخ</label><input type="date" value="${esc(DF.to)}" onchange="dashSet('to',this.value)"></div>
 <div><label>العميل</label><select onchange="dashSet('client',this.value)">${o(DF.client,'','كل العملاء')}${D.clients.map(c=>o(DF.client,c.id,c.name)).join('')}</select></div>
 <div><label>المشرف</label><select onchange="dashSet('sup',this.value)">${o(DF.sup,'','كل المشرفين')}${D.sups.map(c=>o(DF.sup,c.id,c.name)).join('')}</select></div>
-<div><button class="s" onclick="dashReset()">إعادة ضبط</button><button class="pdf" onclick="dashPDF()">${IC('doc')} تصدير PDF</button><button onclick="aiReport()">${IC('trend')} Analyzes</button></div></div></div>`;
+<div class="dbtns" style="grid-column:1/-1;display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-start;padding-top:4px;border-top:1px dashed #c3d3e3"><button onclick="aiReport()">${IC('trend')} Analyzes</button><button class="pdf" onclick="dashPDF()">${IC('doc')} تصدير PDF</button><button class="s" onclick="dashReset()">↺ إعادة ضبط</button></div></div></div>`;
  const fl=[DF.from||DF.to?'الفترة: '+(DF.from||'البداية')+' ← '+(DF.to||'اليوم'):'الفترة: كل الفترات',DF.client?'العميل: '+nm('clients',DF.client):'',DF.sup?'المشرف: '+nm('sups',DF.sup):''].filter(Boolean).join('  |  ');
  m.querySelector('h2').insertAdjacentHTML('beforebegin',PH('لوحة المؤشرات التحليلية')+'<div class="dfs">'+esc(fl)+'</div>');m.querySelector('h2').insertAdjacentHTML('afterend',bar)}
 let AIRUN=0;
