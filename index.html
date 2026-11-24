@@ -1534,13 +1534,18 @@ function aview(id){const a=by('accts',id),r=[...D.rcpts.filter(x=>x.acct===id).m
  $('#main').innerHTML=`<h2>${esc(a.name)}</h2><div class="g"><div class="k"><span>افتتاحي</span><b>${F(a.open)}</b></div><div class="k"><span>إجمالي الوارد</span><b>${F(inAcct(id))}</b></div><div class="k"><span>إجمالي الصادر</span><b>${F(outAcct(id))}</b></div><div class="k"><span>الرصيد الختامي</span><b>${F(bal(id))}</b></div></div><div class="card tw">${stmt(r,a.open)}</div><button class="s np" onclick="go('accts')">رجوع</button>`}
 function closeProj(id){if(ROLE==='viewer'||!ISADM)return msg('للمدير فقط');const p=by('projects',id);if(!p)return;
  if(p.status==='مغلق')return msg('هذا المشروع مغلق بالفعل.');
- const es=D.ests.filter(e=>e.project===id),ap=es.filter(e=>e.status==='معتمدة'),dr=es.filter(e=>e.status==='مسودة'),cu=D.custody.filter(c=>c.project===id&&cRem(c)>0.5),cs=sum(cu,cRem);
- const c=pcard(id);
+ const es=D.ests.filter(e=>e.project===id),ap=es.filter(e=>e.status==='معتمدة'),c=pcard(id),bl=[];
+ const cu=D.custody.filter(x=>x.project===id&&(x.status!=='مسواة'||cRem(x)>0.5));
+ if(cu.length)bl.push('عهد غير مسواة ('+cu.length+'): '+cu.map(x=>esc((x.code||'')+' — '+supOf(x,p)+' — متبقي '+F(cRem(x)))).join('، '));
+ const clRec=sum(D.rcpts.filter(r=>r.project===id&&!r.custody),r=>r.amount),due=Math.round((c.val-clRec)*100)/100;
+ if(due>0.5)bl.push('دفعات العميل غير مكتملة: المتبقي تحصيله من العميل '+F(due)+' (قيمة المقايسات '+F(c.val)+' — المحصّل '+F(clRec)+')');
+ const dr=es.filter(e=>e.status==='مسودة');if(dr.length)bl.push('مقايسات مسودة لم تُعتمد أو تُلغَ ('+dr.length+'): '+dr.map(e=>esc(e.code||'')).join('، '));
+ const ir=D.irets.filter(r=>r.project===id&&r.status!=='مطبّق');if(ir.length)bl.push('مرتجعات فواتير معلّقة لم تُطبَّق في تسوية العهدة ('+ir.length+'): '+ir.map(r=>esc((r.code||'')+' — '+F(r.amount))).join('، '));
+ const sd=Math.round((sum(c.inv,i=>i.amount)-c.supPaid)*100)/100;if(sd>0.5)bl.push('فواتير موردين غير مسددة: المتبقي '+F(sd));
+ if(bl.length)return modal(`<h3>لا يمكن إغلاق المشروع ${esc(p.name||'')}</h3><p class="neg">يوجد ما يمنع الإغلاق، سوِّه أولًا ثم أعد المحاولة:</p><ul>${bl.map(x=>`<li>${x}</li>`).join('')}</ul><p><button class="s" onclick="modal()">إغلاق</button></p>`);
  ask(`إغلاق المشروع <b>${esc(p.name||'')}</b> بعد إنهاء الأعمال؟
  <br>سيتم إتمام وإغلاق ${ap.length} مقايسة معتمدة، وتصبح حالة المشروع «مغلق».
  <br>قيمة المقايسات: <b>${F(c.val)}</b> | التكلفة الفعلية: <b>${F(c.cost)}</b> | الربح التقديري: <b>${F(c.profit)}</b>
- ${dr.length?`<br><span class="neg">تنبيه: يوجد ${dr.length} مقايسة مسودة لم تُعتمد (لن تتأثر).</span>`:''}
- ${cu.length?`<br><span class="neg">تنبيه: توجد عهد غير مسواة بقيمة ${F(cs)} — يُفضّل تسويتها قبل الإغلاق.</span>`:''}
  <br><b class="neg">الإغلاق نهائي ولا يمكن التراجع عنه.</b>`,async()=>{
   try{const at=Date.now(),by0=(await me())||'';
    for(const e of ap)await db.collection('ests').doc(e.id).update({status:'مغلقة',closedAt:at,closedBy:by0});
