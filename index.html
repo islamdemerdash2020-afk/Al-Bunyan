@@ -382,6 +382,10 @@ body:not(.cc) #main:has(#stm) #stm tr.it td{font-size:11px!important}
 .lw form .ip input:not([type=checkbox]){direction:ltr!important;text-align:left!important;padding-left:50px!important;padding-right:50px!important}
 .lw .ip>svg{top:19px!important;width:20px!important;height:20px!important;inset-inline-end:14px!important}
 .lw form>div{margin-bottom:16px!important}
+.lw{background:linear-gradient(#0a1230a8,#0a1230c4);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);border:1px solid #ffffff2e;border-radius:26px;padding:26px 30px 22px;box-shadow:0 20px 50px #0006}
+.lw .lb,.lw h2,.lw .lt{text-shadow:0 2px 8px #000a}
+@media(max-width:600px){.lw{padding:18px 16px}}
+
 .lw .lbtn{padding:16px!important;font-size:19px!important;border-radius:16px!important}
 .lw .lbtn svg{width:20px!important;height:20px!important}
 .lw form label[for],.lw form .rm,.lw form a{font-size:15px}
@@ -1623,7 +1627,7 @@ const AUTH=()=>D.sec.find(x=>x.id==='auth');
 function showLogin(){const L=$('#lg');if(!READY){L.innerHTML=DENY?'<div class="lg"><form class="lf"><p style="color:#fff;text-align:center">لا تملك صلاحية الوصول لبيانات النظام. يلزم الدخول بحساب المالك أو محرر.</p></form></div>':'<div class="lg"><form>جارٍ التحميل…</form></div>';return}
  const a=AUTH();if((a||VAUTH())&&AC===0){AC=1;L.innerHTML='<div class="lg"><form class="lf" style="color:#fff">جارٍ التحقق…</form></div>';tryAuto(a).then(ok=>{AC=2;if(ok){LOG=1;afterLogin()}LGR=0;draw();if(ok)toast('تم تسجيل الدخول تلقائيًا')});return}if(AC===1)return;
  if(LGR)return;LGR=1;const c=co(),gl=c.gallery||[];
- L.innerHTML=`<div class="lg" style="background-image:linear-gradient(${c.loginbg?'#0a123055,#0a123088':'#0a123094,#0a1230ae'}),url('${esc(c.loginbg||BG)}');background-size:cover;background-position:center"><div class="lw"><div class="lb">${c.logo?`<img src="${esc(c.logo)}">`:IC('building')}</div><h2 style="color:#fff">${esc(c.name)}</h2><div class="lt" style="direction:ltr;letter-spacing:1px;font-weight:bold">ERP System</div>
+ L.innerHTML=`<div class="lg" style="background-image:linear-gradient(${c.loginbg?'#0a123055,#0a123088':'#0a12300d,#0a123022'}),url('${esc(c.loginbg||BG)}');background-size:cover;background-position:center"><div class="lw"><div class="lb">${c.logo?`<img src="${esc(c.logo)}">`:IC('building')}</div><h2 style="color:#fff">${esc(c.name)}</h2><div class="lt" style="direction:ltr;letter-spacing:1px;font-weight:bold">ERP System</div>
  <form class="lf" onsubmit="doLogin();return false"><div><label>اسم المستخدم (Username)</label><div class="ip"><input id="lu" oninput="lgU()" autocomplete="username" value="${esc(RM().u||'Islam.demerdash')}">${IC('user')}</div></div>
  <div><label>كلمة المرور (Password)</label><div class="ip"><input id="lp" type="password" autocomplete="current-password" style="padding-inline-start:40px" value="${esc(RM().p||'')}">${IC('lock')}<a class="eyb" onclick="tp()" title="إظهار / إخفاء كلمة المرور" aria-label="إظهار كلمة المرور">${IC('eye')}</a></div></div><div id="lc" style="display:${!a&&ISADM?'block':'none'}"><label>تأكيد كلمة المرور (أول دخول: ستصبح كلمة المرور ثابتة)</label><div class="ip"><input id="lp2" type="password"></div></div>
  <div><label style="display:flex;gap:6px;align-items:center;font-weight:normal"><input id="lr" type="checkbox" style="width:auto" ${RM().u?'checked':''}> تذكرني للفتح تلقائيًا في كل مرة</label></div><div class="er" id="le"></div><button class="lbtn">${IC('shield')} تسجيل الدخول للنظام</button><p style="text-align:center;margin:12px 0 0"><a onclick="fgForm()" style="color:#fff;cursor:pointer;text-decoration:underline;font-size:17px;font-weight:bold;text-shadow:0 1px 4px #000c,0 0 10px #fff3">نسيت كلمة المرور؟</a></p></form></div></div>`}
